@@ -1,25 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import {
-  getContacts,
   addContact as addContactApi,
   deleteContact as deleteContactApi,
+  getContacts,
 } from "../../services/api";
 
 export const fetchContacts = createAsyncThunk(
   "contacts/fetchContacts",
-  async () => {
-    const data = await getContacts();
-
-    return data;
+  async (userId) => {
+    return await getContacts(userId);
   },
 );
 
 export const addContactThunk = createAsyncThunk(
   "contacts/addContact",
-  async (contact) => {
-    const data = await addContactApi(contact);
-
-    return data;
+  async ({ contact, userId }) => {
+    return await addContactApi(contact, userId);
   },
 );
 
@@ -27,7 +23,6 @@ export const deleteContactThunk = createAsyncThunk(
   "contacts/deleteContact",
   async (contactId) => {
     await deleteContactApi(contactId);
-
     return contactId;
   },
 );
@@ -36,25 +31,43 @@ const initialState = {
   items: [],
   isLoading: false,
   error: null,
+  activeUserId: null,
 };
 
 const contactsSlice = createSlice({
   name: "contacts",
-
   initialState,
+  reducers: {
+    clearContacts(state) {
+      state.items = [];
+      state.isLoading = false;
+      state.error = null;
+      state.activeUserId = null;
+    },
+  },
 
   extraReducers: (builder) => {
-    builder.addCase(fetchContacts.pending, (state) => {
+    builder.addCase(fetchContacts.pending, (state, action) => {
+      state.items = [];
       state.isLoading = true;
       state.error = null;
+      state.activeUserId = action.meta.arg;
     });
 
     builder.addCase(fetchContacts.fulfilled, (state, action) => {
+      if (state.activeUserId !== action.meta.arg) {
+        return;
+      }
+
       state.isLoading = false;
       state.items = action.payload;
     });
 
     builder.addCase(fetchContacts.rejected, (state, action) => {
+      if (state.activeUserId !== action.meta.arg) {
+        return;
+      }
+
       state.isLoading = false;
       state.error = action.error.message;
     });
@@ -65,11 +78,19 @@ const contactsSlice = createSlice({
     });
 
     builder.addCase(addContactThunk.fulfilled, (state, action) => {
+      if (state.activeUserId !== action.meta.arg.userId) {
+        return;
+      }
+
       state.isLoading = false;
       state.items.push(action.payload);
     });
 
     builder.addCase(addContactThunk.rejected, (state, action) => {
+      if (state.activeUserId !== action.meta.arg.userId) {
+        return;
+      }
+
       state.isLoading = false;
       state.error = action.error.message;
     });
@@ -94,4 +115,5 @@ const contactsSlice = createSlice({
   },
 });
 
+export const { clearContacts } = contactsSlice.actions;
 export default contactsSlice.reducer;

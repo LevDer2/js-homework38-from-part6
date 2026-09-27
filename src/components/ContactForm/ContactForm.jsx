@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import { addContactThunk } from "../redux/contacts/contactsSlice";
+import { addContactThunk } from "../../redux/contacts/contactsSlice";
+import { selectUserId } from "../../redux/auth/selectors";
 
 function ContactForm() {
   const dispatch = useDispatch();
+  const userId = useSelector(selectUserId);
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -22,7 +24,7 @@ function ContactForm() {
     };
 
     try {
-      await dispatch(addContactThunk(contact)).unwrap();
+      await dispatch(addContactThunk({ contact, userId })).unwrap();
 
       setName("");
       setPhone("");

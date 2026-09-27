@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 
-import { deleteContactThunk } from "../redux/contacts/contactsSlice";
-import { selectContacts } from "../redux/contacts/selectors";
+import { deleteContactThunk } from "../../redux/contacts/contactsSlice";
+import { selectContacts } from "../../redux/contacts/selectors";
 
 function ContactList() {
   const dispatch = useDispatch();

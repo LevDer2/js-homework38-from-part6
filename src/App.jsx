@@ -1,27 +1,28 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import ContactForm from "./components/ContactForm";
-import ContactList from "./components/ContactList";
-import { fetchContacts } from "./redux/contacts/contactsSlice";
-import { selectError, selectIsLoading } from "./redux/contacts/selectors";
+import { Route, Routes } from "react-router-dom";
+import Layout from "./components/Layout/Layout";
+import PrivateRoute from "./components/PrivateRoute/PrivateRoute";
+import Home from "./pages/Home/Home";
+import Contacts from "./pages/Contacts/Contacts";
+import Login from "./pages/Login/Login";
+import Register from "./pages/Register/Register";
 
 function App() {
-  const dispatch = useDispatch();
-  const isLoading = useSelector(selectIsLoading);
-  const error = useSelector(selectError);
-
-  useEffect(() => {
-    dispatch(fetchContacts());
-  }, [dispatch]);
-
   return (
-    <main>
-      <h1>Phonebook</h1>
-      <ContactForm />
-      {isLoading && <p>Loading...</p>}
-      {error && <p>Error: {error}</p>}
-      <ContactList />
-    </main>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index element={<Home />} />
+        <Route path="register" element={<Register />} />
+        <Route path="login" element={<Login />} />
+        <Route
+          path="contacts"
+          element={
+            <PrivateRoute>
+              <Contacts />
+            </PrivateRoute>
+          }
+        />
+      </Route>
+    </Routes>
   );
 }
 
